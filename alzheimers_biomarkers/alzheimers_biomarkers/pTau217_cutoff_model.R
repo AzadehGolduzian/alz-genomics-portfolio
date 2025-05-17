@@ -1,3 +1,12 @@
+---
+title: "Abeta_ptau217_cutpoint (Example with Simulated Data)"
+author: "Azadeh Golduzian"
+output:
+  html_document:
+    toc: true
+editor: visual
+---
+
 ## Goal of This Analysis
 
 The goal of this code is to explore the relationship between plasma pTau217 levels and amyloid-beta (Aβ) pathology, operationalized as the Aβ42/40 ratio. Specifically, we aim to:
@@ -8,19 +17,11 @@ The goal of this code is to explore the relationship between plasma pTau217 leve
 - Compare pTau217's predictive value against other biomarkers, including plasma pTau181 and CSF pTau181.
 - Visualize model contrasts and ROC thresholds to support biomarker threshold selection for future clinical and research use.
 
-This analysis contributes to validating plasma-based biomarkers as potential non-invasive alternatives to CSF and PET measures in Alzheimer's research.
-
-
----
-title: "Abeta_ptau217_cutpoint (Example with Simulated Data)"
-author: "Azadeh Golduzian"
-output:
-  html_document:
-    toc: true
-editor: visual
----
-
 > ⚠️ This example uses **simulated data** for demonstration only. No real patient information is included.
+
+---
+
+## Setup
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
@@ -47,9 +48,11 @@ library(pROC)
 library(rlang)
 library(patchwork)
 
+Simulate Example Data
+
 set.seed(2025)
 example_data <- data.frame(
-  fl_abeta_4240_ratio    = runif(200, min = 0.04, max = 0.16),
+  fl_abeta_4240_ratio = runif(200, min = 0.04, max = 0.16),
   fl_plasma__ALL__ptau_217 = rnorm(200, mean = 0.5, sd = 0.12)
 ) %>%
   mutate(
@@ -59,8 +62,7 @@ example_data <- data.frame(
     )
   )
 
-
-# Fit GLM
+Fit Logistic Regression Model
 outcome <- "fl_abeta_positivity"
 predictor <- "fl_plasma__ALL__ptau_217"
 
@@ -73,8 +75,10 @@ model <- glm(
   data = clean_data,
   family = binomial
 )
+summary(model)
 
-# ROC
+ROC Curve and AUC
+
 roc_res <- e_plot_roc(
   labels_true      = clean_data[[outcome]],
   pred_values_pos  = model$fitted.values,
@@ -84,14 +88,16 @@ roc_res <- e_plot_roc(
 
 roc_plot <- roc_res$plot_roc +
   ggtitle("ROC Curve: pTau217 → Abeta Positivity")
-auc_val <- roc_res$roc_curve_best$auc
 
 roc_plot
 
-# Best threshold
-thresh <- roc_res$roc_curve_best$thresh
+Optimal Threshold
 
-# Contrast plot
+thresh <- roc_res$roc_curve_best$thresh
+thresh
+
+
+Contrast Plot
 dat_cont <- data.frame(fl_plasma__ALL__ptau_217 = clean_data[[predictor]])
 fit_glm_01 <- glm(
   cbind(as.numeric(as.character(clean_data[[outcome]])),
@@ -108,13 +114,15 @@ contr_plot <- e_plot_model_contrasts(
   geom_hline(yintercept = thresh, linetype = "dashed", color = "red") +
   ggtitle("Probability Curve with Cut-Point")
 
-# Scatter of true labels vs pTau217
+contr_plot
+
+Scatter Plot of Labels vs pTau217
 scatter_plot <- ggplot(clean_data, aes(
   x = fl_plasma__ALL__ptau_217,
   y = as.numeric(as.character(fl_abeta_positivity))
 )) +
   geom_jitter(height = 0.02, alpha = 0.6) +
-  geom_vline(xintercept = (log(thresh/(1-thresh)) - coef(model)[1]) / coef(model)[2],
+  geom_vline(xintercept = (log(thresh / (1 - thresh)) - coef(model)[1]) / coef(model)[2],
              linetype = "dashed", color = "blue") +
   labs(
     title = "Observed Positivity vs pTau217",
@@ -123,9 +131,19 @@ scatter_plot <- ggplot(clean_data, aes(
   ) +
   theme_minimal()
 
-# Combine
+scatter_plot
+
+Combine All Plots
+
 combined <- roc_plot + contr_plot + scatter_plot + 
   plot_layout(ncol = 3)
 
 combined
+
+
+
+
+
+ 
+
 
