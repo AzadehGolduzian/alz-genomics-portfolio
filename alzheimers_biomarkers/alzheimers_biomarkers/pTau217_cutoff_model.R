@@ -1,3 +1,16 @@
+## Goal of This Analysis
+
+The goal of this code is to explore the relationship between plasma pTau217 levels and amyloid-beta (Aβ) pathology, operationalized as the Aβ42/40 ratio. Specifically, we aim to:
+
+- Assess how well pTau217 predicts Aβ positivity using logistic regression models.
+- Determine optimal cutpoints for pTau217 that classify individuals as Aβ-positive or -negative.
+- Evaluate model performance through internal validation (model fit) and external validation via jackknife and k-fold cross-validation ROC curves.
+- Compare pTau217's predictive value against other biomarkers, including plasma pTau181 and CSF pTau181.
+- Visualize model contrasts and ROC thresholds to support biomarker threshold selection for future clinical and research use.
+
+This analysis contributes to validating plasma-based biomarkers as potential non-invasive alternatives to CSF and PET measures in Alzheimer's research.
+
+
 ---
 title: "Abeta_ptau217_cutpoint (Example with Simulated Data)"
 author: "Azadeh Golduzian"
